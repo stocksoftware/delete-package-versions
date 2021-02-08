@@ -30,9 +30,9 @@ inputs:
   num-old-versions-to-delete:
     description: >
       Number of versions to delete starting with the oldest version.
-      Defaults to 1.
+      Defaults to 0.
     required: false
-    default: "1"
+    default: "0"
 
   num-versions-to-keep:
     description: >

@@ -36,7 +36,7 @@ This action deletes versions of a package from [GitHub Packages](https://github.
   package-name:
 
   # The number of old versions to delete starting from the oldest version.
-  # Defaults to 1.
+  # Defaults to 0.
   num-old-versions-to-delete:
 
   # Number of the most recent versions to keep.
