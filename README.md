@@ -41,7 +41,7 @@ This action deletes versions of a package from [GitHub Packages](https://github.
 
   # Number of the most recent versions to keep.
   # Defaults to 0.
-  num-most-recent-versions-to-keep:
+  num-versions-to-keep:
 
   # The token used to authenticate with GitHub Packages.
   # Defaults to github.token.
