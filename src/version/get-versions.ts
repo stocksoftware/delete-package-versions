@@ -1,5 +1,5 @@
 import {GraphQlQueryResponse} from '@octokit/graphql/dist-types/types'
-import {Observable, from, throwError} from 'rxjs'
+import {from, Observable, throwError} from 'rxjs'
 import {catchError, map} from 'rxjs/operators'
 import {graphql} from './graphql'
 

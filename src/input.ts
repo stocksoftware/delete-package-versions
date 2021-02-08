@@ -51,11 +51,11 @@ export class Input {
 
   hasNumToKeepQueryInfo(): boolean {
     return !!(
-        this.owner &&
-        this.repo &&
-        this.packageName &&
-        this.numVersionsToKeep > 0 &&
-        this.token
+      this.owner &&
+      this.repo &&
+      this.packageName &&
+      this.numVersionsToKeep > 0 &&
+      this.token
     )
   }
 }
