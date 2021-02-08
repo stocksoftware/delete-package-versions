@@ -178,8 +178,10 @@ export function getNotKeptVersions(
             }
 
             const numVersions = all.repository.packages.edges[0].node.versions.edges.length
+            console.log('Total versions found = ' + numVersions )
 
             if (numVersions > numVersionsToKeep) {
+                console.log('Num versions to delete = ' + (numVersions - numVersionsToKeep ))
                 return queryForOldestVersions(
                     owner,
                     repo,
@@ -200,6 +202,10 @@ export function getNotKeptVersions(
                             .reverse()
                     })
                 )
+            }
+            else
+            {
+                console.log('Exceeds requested number. No versions will be deleted.')
             }
         }
     ))
