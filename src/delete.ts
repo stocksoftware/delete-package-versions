@@ -1,6 +1,6 @@
 import {Input} from './input'
 import {Observable, of, throwError} from 'rxjs'
-import {deletePackageVersions, getOldestVersions} from './version'
+import {deletePackageVersions, getOldestVersions, getNotKeptVersions} from './version'
 import {concatMap, map} from 'rxjs/operators'
 
 export function getVersionIds(input: Input): Observable<string[]> {
@@ -15,6 +15,15 @@ export function getVersionIds(input: Input): Observable<string[]> {
       input.packageName,
       input.numOldVersionsToDelete,
       input.token
+    ).pipe(map(versionInfo => versionInfo.map(info => info.id)))
+  }
+  else if (input.hasNumToKeepQueryInfo()) {
+    return getNotKeptVersions(
+        input.owner,
+        input.repo,
+        input.packageName,
+        input.numVersionsToKeep,
+        input.token
     ).pipe(map(versionInfo => versionInfo.map(info => info.id)))
   }
 
