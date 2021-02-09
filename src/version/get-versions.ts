@@ -45,7 +45,7 @@ const queryForLast = `
   }`
 
 const queryForAll = `
-  query getVersions($owner: String!, $repo: String!, $package: String!, $last: Int!) {
+  query getVersions($owner: String!, $repo: String!, $package: String!) {
     repository(owner: $owner, name: $repo) {
       packages(first: 1, names: [$package]) {
         edges {
