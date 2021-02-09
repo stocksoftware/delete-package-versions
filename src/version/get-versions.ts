@@ -177,6 +177,10 @@ export function getNotKeptVersions(
             )
           }
 
+          console.log(
+            `all.repository.packages.edges[0] = ${all.repository.packages.edges[0]}`
+          )
+
           const numVersions =
             all.repository.packages.edges[0].node.versions.edges.length
           console.log(`Total versions found = ${numVersions}`)
@@ -199,6 +203,10 @@ export function getNotKeptVersions(
                       `package: ${packageName} not found for owner: ${owner} in repo: ${repo}`
                     )
                   }
+
+                  console.log(
+                    `result.repository.packages.edges[0] = ${result.repository.packages.edges[0]}`
+                  )
 
                   const versions =
                     result.repository.packages.edges[0].node.versions.edges
