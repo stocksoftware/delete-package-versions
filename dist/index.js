@@ -16185,7 +16185,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const rxjs_1 = __webpack_require__(931);
 const operators_1 = __webpack_require__(43);
 const graphql_1 = __webpack_require__(767);
-const MAX_DELETIONS = 1000;
+const MAX_DELETIONS = 100;
 const queryForLast = `
   query getVersions($owner: String!, $repo: String!, $package: String!, $last: Int!) {
     repository(owner: $owner, name: $repo) {

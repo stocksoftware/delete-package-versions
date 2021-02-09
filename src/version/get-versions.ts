@@ -3,7 +3,7 @@ import {from, Observable, throwError} from 'rxjs'
 import {catchError, map} from 'rxjs/operators'
 import {graphql} from './graphql'
 
-const MAX_DELETIONS = 1000
+const MAX_DELETIONS = 100
 
 export interface VersionInfo {
   id: string
