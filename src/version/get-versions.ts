@@ -94,31 +94,33 @@ export function queryForOldestVersions(
   )
 }
 
-export function queryForAllVersions(
+export async function queryForAllVersions(
   owner: string,
   repo: string,
   packageName: string,
   token: string
-): Observable<GetVersionsQueryResponse> {
-    return from(
-        graphql(token, queryForAll, {
-            owner,
-            repo,
-            package: packageName,
-            headers: {
-                Accept: 'application/vnd.github.packages-preview+json'
-            }
-        }) as Promise<GetVersionsQueryResponse>
-    ).pipe(
-        catchError((err: GraphQlQueryResponse) => {
-            const msg = 'query for all versions failed.'
-            return throwError(
-                err.errors && err.errors.length > 0
-                    ? `${msg} ${err.errors[0].message}`
-                    : `${msg} verify input parameters are correct`
-            )
-        })
+): Promise<GetVersionsQueryResponse> {
+  return from(
+    graphql(token, queryForAll, {
+      owner,
+      repo,
+      package: packageName,
+      headers: {
+        Accept: 'application/vnd.github.packages-preview+json'
+      }
+    }) as Promise<GetVersionsQueryResponse>
+  )
+    .pipe(
+      catchError((err: GraphQlQueryResponse) => {
+        const msg = 'query for all versions failed.'
+        return throwError(
+          err.errors && err.errors.length > 0
+            ? `${msg} ${err.errors[0].message}`
+            : `${msg} verify input parameters are correct`
+        )
+      })
     )
+    .toPromise()
 }
 
 export function getOldestVersions(
@@ -158,55 +160,67 @@ export function getOldestVersions(
 }
 
 export function getNotKeptVersions(
-    owner: string,
-    repo: string,
-    packageName: string,
-    numVersionsToKeep: number,
-    token: string
+  owner: string,
+  repo: string,
+  packageName: string,
+  numVersionsToKeep: number,
+  token: string
 ): Observable<VersionInfo[]> {
-    return queryForAllVersions(
-        owner,
-        repo,
-        packageName,
-        token
-    ).pipe(map(all => {
+  return from(
+    Promise.resolve()
+      .then(queryForAllVersions.bind(null, owner, repo, packageName, token))
+      .then(
+        async (all: GetVersionsQueryResponse): Promise<VersionInfo[]> => {
+          if (all.repository.packages.edges.length < 1) {
+            throwError(
+              `package: ${packageName} not found for owner: ${owner} in repo: ${repo}`
+            )
+          }
 
-            if (all.repository.packages.edges.length < 1) {
-                throwError(
-                    `package: ${packageName} not found for owner: ${owner} in repo: ${repo}`
-                )
-            }
+          const numVersions =
+            all.repository.packages.edges[0].node.versions.edges.length
+          console.log(`Total versions found = ${numVersions}`)
 
-            const numVersions = all.repository.packages.edges[0].node.versions.edges.length
-            console.log('Total versions found = ' + numVersions )
+          if (numVersions > numVersionsToKeep) {
+            console.log(
+              `Num versions to delete = ${numVersions - numVersionsToKeep}`
+            )
+            return queryForOldestVersions(
+              owner,
+              repo,
+              packageName,
+              numVersions - numVersionsToKeep,
+              token
+            )
+              .pipe(
+                map((result: GetVersionsQueryResponse): VersionInfo[] => {
+                  if (result.repository.packages.edges.length < 1) {
+                    throwError(
+                      `package: ${packageName} not found for owner: ${owner} in repo: ${repo}`
+                    )
+                  }
 
-            if (numVersions > numVersionsToKeep) {
-                console.log('Num versions to delete = ' + (numVersions - numVersionsToKeep ))
-                return queryForOldestVersions(
-                    owner,
-                    repo,
-                    packageName,
-                    numVersions - numVersionsToKeep,
-                    token
-                ).pipe(
-                    map(result => {
-                        if (result.repository.packages.edges.length < 1) {
-                            throwError(
-                                `package: ${packageName} not found for owner: ${owner} in repo: ${repo}`
-                            )
-                        }
-
-                        const versions = result.repository.packages.edges[0].node.versions.edges
-                        return versions
-                            .map(value => ({id: value.node.id, version: value.node.version}))
-                            .reverse()
+                  const versions =
+                    result.repository.packages.edges[0].node.versions.edges
+                  return versions
+                    .map(value => {
+                      const vi: VersionInfo = {
+                        id: value.node.id,
+                        version: value.node.version
+                      }
+                      return vi
                     })
-                )
-            }
-            else
-            {
-                console.log('Exceeds requested number. No versions will be deleted.')
-            }
+                    .reverse()
+                })
+              )
+              .toPromise()
+          } else {
+            console.log(
+              'Exceeds requested number. No versions will be deleted.'
+            )
+            return new Promise(resolve => resolve([] as VersionInfo[]))
+          }
         }
-    ))
+      )
+  )
 }

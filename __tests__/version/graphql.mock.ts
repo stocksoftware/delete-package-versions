@@ -38,12 +38,13 @@ export function getMockedOldestQueryResponse(
   }
 }
 
-export function mockOldestQueryResponse(
-  numVersions: number
-) {
-  const response = new Promise((resolve) => {
+export function mockOldestQueryResponse(numVersions: number) {
+  const response = new Promise(resolve => {
     resolve(getMockedOldestQueryResponse(numVersions))
   }) as Promise<GraphQlQueryResponseData>
-  jest.spyOn(Graphql, 'graphql').mockImplementation(
-    (token: string, query: string, parameters: RequestParameters) => response)
+  jest
+    .spyOn(Graphql, 'graphql')
+    .mockImplementation(
+      (token: string, query: string, parameters: RequestParameters) => response
+    )
 }
