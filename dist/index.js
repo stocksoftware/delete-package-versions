@@ -6509,7 +6509,7 @@ function deletePackageVersion(packageVersionId, token) {
 exports.deletePackageVersion = deletePackageVersion;
 function deletePackageVersions(packageVersionIds, token) {
     if (packageVersionIds.length === 0) {
-        console.log('no package version ids found, no versions will be deleted');
+        console.log('No package version ids found, no versions will be deleted');
         return rxjs_1.of(true);
     }
     const deletes = packageVersionIds.map(id => deletePackageVersion(id, token).pipe(operators_1.tap(result => {
@@ -16185,6 +16185,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const rxjs_1 = __webpack_require__(931);
 const operators_1 = __webpack_require__(43);
 const graphql_1 = __webpack_require__(767);
+const MAX_DELETIONS = 1000;
 const queryForLast = `
   query getVersions($owner: String!, $repo: String!, $package: String!, $last: Int!) {
     repository(owner: $owner, name: $repo) {
@@ -16193,26 +16194,6 @@ const queryForLast = `
           node {
             name
             versions(last: $last) {
-              edges {
-                node {
-                  id
-                  version
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }`;
-const queryForAll = `
-  query getVersions($owner: String!, $repo: String!, $package: String!) {
-    repository(owner: $owner, name: $repo) {
-      packages(first: 1, names: [$package]) {
-        edges {
-          node {
-            name
-            versions {
               edges {
                 node {
                   id
@@ -16244,10 +16225,11 @@ function queryForOldestVersions(owner, repo, packageName, numVersions, token) {
 exports.queryForOldestVersions = queryForOldestVersions;
 function queryForAllVersions(owner, repo, packageName, token) {
     return __awaiter(this, void 0, void 0, function* () {
-        return rxjs_1.from(graphql_1.graphql(token, queryForAll, {
+        return rxjs_1.from(graphql_1.graphql(token, queryForLast, {
             owner,
             repo,
             package: packageName,
+            last: MAX_DELETIONS,
             headers: {
                 Accept: 'application/vnd.github.packages-preview+json'
             }

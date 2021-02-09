@@ -3,6 +3,8 @@ import {from, Observable, throwError} from 'rxjs'
 import {catchError, map} from 'rxjs/operators'
 import {graphql} from './graphql'
 
+const MAX_DELETIONS = 1000
+
 export interface VersionInfo {
   id: string
   version: string
@@ -31,27 +33,6 @@ const queryForLast = `
           node {
             name
             versions(last: $last) {
-              edges {
-                node {
-                  id
-                  version
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }`
-
-const queryForAll = `
-  query getVersions($owner: String!, $repo: String!, $package: String!) {
-    repository(owner: $owner, name: $repo) {
-      packages(first: 1, names: [$package]) {
-        edges {
-          node {
-            name
-            versions {
               edges {
                 node {
                   id
@@ -101,10 +82,11 @@ export async function queryForAllVersions(
   token: string
 ): Promise<GetVersionsQueryResponse> {
   return from(
-    graphql(token, queryForAll, {
+    graphql(token, queryForLast, {
       owner,
       repo,
       package: packageName,
+      last: MAX_DELETIONS,
       headers: {
         Accept: 'application/vnd.github.packages-preview+json'
       }
