@@ -16267,7 +16267,9 @@ function getOldestVersions(owner, repo, packageName, numVersions, token) {
         if (result.repository.packages.edges.length < 1) {
             rxjs_1.throwError(`package: ${packageName} not found for owner: ${owner} in repo: ${repo}`);
         }
-        const versions = result.repository.packages.edges[0].node.versions.edges;
+        const versions = result.repository.packages.edges[0]
+            ? result.repository.packages.edges[0].node.versions.edges
+            : [];
         if (versions.length !== numVersions) {
             console.log(`number of versions requested was: ${numVersions}, but found: ${versions.length}`);
         }
@@ -16284,8 +16286,9 @@ function getNotKeptVersions(owner, repo, packageName, numVersionsToKeep, token) 
         if (all.repository.packages.edges.length < 1) {
             rxjs_1.throwError(`package: ${packageName} not found for owner: ${owner} in repo: ${repo}`);
         }
-        console.log(`all.repository.packages.edges[0] = ${all.repository.packages.edges[0]}`);
-        const numVersions = all.repository.packages.edges[0].node.versions.edges.length;
+        const numVersions = all.repository.packages.edges[0]
+            ? all.repository.packages.edges[0].node.versions.edges.length
+            : 0;
         console.log(`Total versions found = ${numVersions}`);
         if (numVersions > numVersionsToKeep) {
             console.log(`Num versions to delete = ${numVersions - numVersionsToKeep}`);
@@ -16294,7 +16297,6 @@ function getNotKeptVersions(owner, repo, packageName, numVersionsToKeep, token) 
                 if (result.repository.packages.edges.length < 1) {
                     rxjs_1.throwError(`package: ${packageName} not found for owner: ${owner} in repo: ${repo}`);
                 }
-                console.log(`result.repository.packages.edges[0] = ${result.repository.packages.edges[0]}`);
                 const versions = result.repository.packages.edges[0].node.versions.edges;
                 return versions
                     .map(value => {
@@ -16309,7 +16311,7 @@ function getNotKeptVersions(owner, repo, packageName, numVersionsToKeep, token) 
                 .toPromise();
         }
         else {
-            console.log('Exceeds requested number. No versions will be deleted.');
+            console.log(`Less than ${numVersionsToKeep} versions exist. No versions will be deleted.`);
             return new Promise(resolve => resolve([]));
         }
     })));

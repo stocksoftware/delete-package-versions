@@ -144,7 +144,9 @@ export function getOldestVersions(
         )
       }
 
-      const versions = result.repository.packages.edges[0].node.versions.edges
+      const versions = result.repository.packages.edges[0]
+        ? result.repository.packages.edges[0].node.versions.edges
+        : []
 
       if (versions.length !== numVersions) {
         console.log(
@@ -177,12 +179,10 @@ export function getNotKeptVersions(
             )
           }
 
-          console.log(
-            `all.repository.packages.edges[0] = ${all.repository.packages.edges[0]}`
-          )
+          const numVersions = all.repository.packages.edges[0]
+            ? all.repository.packages.edges[0].node.versions.edges.length
+            : 0
 
-          const numVersions =
-            all.repository.packages.edges[0].node.versions.edges.length
           console.log(`Total versions found = ${numVersions}`)
 
           if (numVersions > numVersionsToKeep) {
@@ -204,10 +204,6 @@ export function getNotKeptVersions(
                     )
                   }
 
-                  console.log(
-                    `result.repository.packages.edges[0] = ${result.repository.packages.edges[0]}`
-                  )
-
                   const versions =
                     result.repository.packages.edges[0].node.versions.edges
                   return versions
@@ -224,7 +220,7 @@ export function getNotKeptVersions(
               .toPromise()
           } else {
             console.log(
-              'Exceeds requested number. No versions will be deleted.'
+              `Less than ${numVersionsToKeep} versions exist. No versions will be deleted.`
             )
             return new Promise(resolve => resolve([] as VersionInfo[]))
           }
