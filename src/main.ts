@@ -16,7 +16,7 @@ function getActionInput(): Input {
     numOldVersionsToDelete: Number(getInput('num-old-versions-to-delete')),
     numVersionsToKeep: Number(getInput('num-versions-to-keep')),
     token: getInput('token'),
-    keepReleased: Boolean(getInput('keepReleased'))
+    keepReleased: Boolean(getInput('keep-released'))
   })
 }
 

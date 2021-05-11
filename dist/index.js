@@ -6090,7 +6090,7 @@ function getActionInput() {
         numOldVersionsToDelete: Number(core_1.getInput('num-old-versions-to-delete')),
         numVersionsToKeep: Number(core_1.getInput('num-versions-to-keep')),
         token: core_1.getInput('token'),
-        keepReleased: Boolean(core_1.getInput('keepReleased'))
+        keepReleased: Boolean(core_1.getInput('keep-released'))
     });
 }
 function run() {
