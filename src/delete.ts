@@ -8,9 +8,13 @@ export async function getVersionIds(input: Input): Promise<string[]> {
     return Promise.resolve(input.packageVersionIds)
   }
 
+  console.log(`input.keepReleased = ${input.keepReleased}`)
+
   let protectedVersions: string[] = []
   if (input.keepReleased) {
+    console.log('getting released versions')
     protectedVersions = await getReleasedVersions(input.owner, input.repo, input.packageName, input.token)
+    console.log(`got ${protectedVersions.length} released versions`)
   }
 
   if (input.hasOldestVersionQueryInfo()) {

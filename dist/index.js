@@ -6514,7 +6514,7 @@ function deletePackageVersions(packageVersionIds, token) {
         return rxjs_1.of(true);
     }
     // Disable the actual delete for now
-    if (token === '') {
+    if (token !== '') {
         return rxjs_1.of(true);
     }
     const deletes = packageVersionIds.map(id => deletePackageVersion(id, token).pipe(operators_1.tap(result => {
@@ -15848,9 +15848,12 @@ function getVersionIds(input) {
         if (input.packageVersionIds.length > 0) {
             return Promise.resolve(input.packageVersionIds);
         }
+        console.log(`input.keepReleased = ${input.keepReleased}`);
         let protectedVersions = [];
         if (input.keepReleased) {
+            console.log('getting released versions');
             protectedVersions = yield version_1.getReleasedVersions(input.owner, input.repo, input.packageName, input.token);
+            console.log(`got ${protectedVersions.length} released versions`);
         }
         if (input.hasOldestVersionQueryInfo()) {
             return version_1.getOldestVersions(input.owner, input.repo, input.packageName, input.numOldVersionsToDelete, input.token, protectedVersions)

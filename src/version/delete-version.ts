@@ -44,7 +44,7 @@ export function deletePackageVersions(packageVersionIds: string[], token: string
   }
 
   // Disable the actual delete for now
-  if (token === '') {
+  if (token !== '') {
     return of(true)
   }
 
