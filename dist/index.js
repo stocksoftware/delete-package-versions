@@ -6511,10 +6511,6 @@ function deletePackageVersions(packageVersionIds, token) {
         console.log('No package version ids found, no versions will be deleted');
         return rxjs_1.of(true);
     }
-    // Disable the actual delete for now
-    if (token !== '') {
-        return rxjs_1.of(true);
-    }
     const deletes = packageVersionIds.map(id => deletePackageVersion(id, token).pipe(operators_1.tap(result => {
         if (result) {
             console.log(`version with id: ${id}, deleted`);
