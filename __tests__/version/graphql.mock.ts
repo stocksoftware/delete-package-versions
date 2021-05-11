@@ -1,14 +1,9 @@
-import {
-  GraphQlQueryResponseData,
-  RequestParameters
-} from '@octokit/graphql/dist-types/types'
+import {GraphQlQueryResponseData, RequestParameters} from '@octokit/graphql/dist-types/types'
 
 import * as Graphql from '../../src/version/graphql'
 import {GetVersionsQueryResponse} from '../../src/version'
 
-export function getMockedOldestQueryResponse(
-  numVersions: number
-): GetVersionsQueryResponse {
+export function getMockedOldestQueryResponse(numVersions: number): GetVersionsQueryResponse {
   const versions = []
 
   for (let i = 1; i <= numVersions; ++i) {
@@ -44,7 +39,5 @@ export function mockOldestQueryResponse(numVersions: number) {
   }) as Promise<GraphQlQueryResponseData>
   jest
     .spyOn(Graphql, 'graphql')
-    .mockImplementation(
-      (token: string, query: string, parameters: RequestParameters) => response
-    )
+    .mockImplementation((token: string, query: string, parameters: RequestParameters) => response)
 }

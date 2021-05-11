@@ -41,6 +41,13 @@ inputs:
     required: false
     default: "0"
 
+  keep-released:
+    description: >
+      If true, released versions are not deleted.
+      Defaults to true.
+    required: false
+    default: "true"
+
   token:
     description: >
       Token with the necessary scopes to delete package versions.

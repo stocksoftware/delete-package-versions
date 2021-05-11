@@ -6089,7 +6089,8 @@ function getActionInput() {
         packageName: core_1.getInput('package-name'),
         numOldVersionsToDelete: Number(core_1.getInput('num-old-versions-to-delete')),
         numVersionsToKeep: Number(core_1.getInput('num-versions-to-keep')),
-        token: core_1.getInput('token')
+        token: core_1.getInput('token'),
+        keepReleased: Boolean(core_1.getInput('keepReleased'))
     });
 }
 function run() {
@@ -13968,7 +13969,8 @@ const defaultParams = {
     packageName: '',
     numOldVersionsToDelete: 0,
     numVersionsToKeep: 0,
-    token: ''
+    token: '',
+    keepReleased: true
 };
 class Input {
     constructor(params) {
@@ -13980,6 +13982,7 @@ class Input {
         this.numOldVersionsToDelete = validatedParams.numOldVersionsToDelete;
         this.numVersionsToKeep = validatedParams.numVersionsToKeep;
         this.token = validatedParams.token;
+        this.keepReleased = validatedParams.keepReleased;
     }
     hasOldestVersionQueryInfo() {
         return !!(this.owner &&
@@ -15823,21 +15826,40 @@ var CatchSubscriber = (function (_super) {
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const rxjs_1 = __webpack_require__(931);
 const version_1 = __webpack_require__(83);
 const operators_1 = __webpack_require__(43);
 function getVersionIds(input) {
-    if (input.packageVersionIds.length > 0) {
-        return rxjs_1.of(input.packageVersionIds);
-    }
-    if (input.hasOldestVersionQueryInfo()) {
-        return version_1.getOldestVersions(input.owner, input.repo, input.packageName, input.numOldVersionsToDelete, input.token).pipe(operators_1.map(versionInfo => versionInfo.map(info => info.id)));
-    }
-    else if (input.hasNumToKeepQueryInfo()) {
-        return version_1.getNotKeptVersions(input.owner, input.repo, input.packageName, input.numVersionsToKeep, input.token).pipe(operators_1.map(versionInfo => versionInfo.map(info => info.id)));
-    }
-    return rxjs_1.throwError("Could not get packageVersionIds. Explicitly specify using the 'package-version-ids' input or provide the 'package-name' and 'num-old-versions-to-delete' inputs to dynamically retrieve oldest versions");
+    return __awaiter(this, void 0, void 0, function* () {
+        if (input.packageVersionIds.length > 0) {
+            return Promise.resolve(input.packageVersionIds);
+        }
+        let protectedVersions = [];
+        if (input.keepReleased) {
+            protectedVersions = yield version_1.getReleasedVersions(input.owner, input.repo, input.packageName, input.token);
+        }
+        if (input.hasOldestVersionQueryInfo()) {
+            return version_1.getOldestVersions(input.owner, input.repo, input.packageName, input.numOldVersionsToDelete, input.token, protectedVersions)
+                .pipe(operators_1.map(versionInfo => versionInfo.map(info => info.id)))
+                .toPromise();
+        }
+        else if (input.hasNumToKeepQueryInfo()) {
+            return version_1.getNotKeptVersions(input.owner, input.repo, input.packageName, input.numVersionsToKeep, input.token, protectedVersions)
+                .pipe(operators_1.map(versionInfo => versionInfo.map(info => info.id)))
+                .toPromise();
+        }
+        return Promise.reject(new Error("Could not get packageVersionIds. Explicitly specify using the 'package-version-ids' input or provide the 'package-name' and 'num-old-versions-to-delete' inputs to dynamically retrieve oldest versions"));
+    });
 }
 exports.getVersionIds = getVersionIds;
 function deleteVersions(input) {
@@ -15848,7 +15870,7 @@ function deleteVersions(input) {
         console.log('Either num-old-versions-to-delete or num-versions-to-keep needs to be specified. No versions will be deleted.');
         return rxjs_1.of(true);
     }
-    return getVersionIds(input).pipe(operators_1.concatMap(ids => version_1.deletePackageVersions(ids, input.token)));
+    return rxjs_1.from(getVersionIds(input)).pipe(operators_1.concatMap(ids => version_1.deletePackageVersions(ids, input.token)));
 }
 exports.deleteVersions = deleteVersions;
 
@@ -16206,6 +16228,18 @@ const queryForLast = `
       }
     }
   }`;
+const queryFor100Releases = `
+  query getReleases($owner: String!, $repo: String!) {
+    repository(owner: $owner, name: $repo) {
+      releases(first:100) {
+        edges{
+          node {
+           name
+          }
+        }
+      }
+    }
+  }`;
 function queryForOldestVersions(owner, repo, packageName, numVersions, token) {
     return rxjs_1.from(graphql_1.graphql(token, queryForLast, {
         owner,
@@ -16222,7 +16256,17 @@ function queryForOldestVersions(owner, repo, packageName, numVersions, token) {
             : `${msg} verify input parameters are correct`);
     }));
 }
-exports.queryForOldestVersions = queryForOldestVersions;
+function queryForReleases(owner, repo, token) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return graphql_1.graphql(token, queryFor100Releases, {
+            owner,
+            repo,
+            headers: {
+                Accept: 'application/vnd.github.packages-preview+json'
+            }
+        });
+    });
+}
 function queryForAllVersions(owner, repo, packageName, token) {
     return __awaiter(this, void 0, void 0, function* () {
         return rxjs_1.from(graphql_1.graphql(token, queryForLast, {
@@ -16243,8 +16287,7 @@ function queryForAllVersions(owner, repo, packageName, token) {
             .toPromise();
     });
 }
-exports.queryForAllVersions = queryForAllVersions;
-function getOldestVersions(owner, repo, packageName, numVersions, token) {
+function getOldestVersions(owner, repo, packageName, numVersions, token, protectedVersions) {
     return queryForOldestVersions(owner, repo, packageName, numVersions, token).pipe(operators_1.map(result => {
         if (result.repository.packages.edges.length < 1) {
             rxjs_1.throwError(`package: ${packageName} not found for owner: ${owner} in repo: ${repo}`);
@@ -16256,12 +16299,13 @@ function getOldestVersions(owner, repo, packageName, numVersions, token) {
             console.log(`number of versions requested was: ${numVersions}, but found: ${versions.length}`);
         }
         return versions
+            .filter(value => !versionProtected(value.node.version, protectedVersions))
             .map(value => ({ id: value.node.id, version: value.node.version }))
             .reverse();
     }));
 }
 exports.getOldestVersions = getOldestVersions;
-function getNotKeptVersions(owner, repo, packageName, numVersionsToKeep, token) {
+function getNotKeptVersions(owner, repo, packageName, numVersionsToKeep, token, protectedVersions) {
     return rxjs_1.from(Promise.resolve()
         .then(queryForAllVersions.bind(null, owner, repo, packageName, token))
         .then((all) => __awaiter(this, void 0, void 0, function* () {
@@ -16281,13 +16325,8 @@ function getNotKeptVersions(owner, repo, packageName, numVersionsToKeep, token) 
                 }
                 const versions = result.repository.packages.edges[0].node.versions.edges;
                 return versions
-                    .map(value => {
-                    const vi = {
-                        id: value.node.id,
-                        version: value.node.version
-                    };
-                    return vi;
-                })
+                    .filter(value => !protectedVersions.includes(value.node.version))
+                    .map(value => ({ id: value.node.id, version: value.node.version }))
                     .reverse();
             }))
                 .toPromise();
@@ -16299,6 +16338,24 @@ function getNotKeptVersions(owner, repo, packageName, numVersionsToKeep, token) 
     })));
 }
 exports.getNotKeptVersions = getNotKeptVersions;
+function getReleasedVersions(owner, repo, packageName, token) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return queryForReleases(owner, repo, token)
+            .then((res) => res.repository.releases.edges.map(e => e.node.name))
+            .catch((err) => {
+            const msg = 'query for releases failed.';
+            return rxjs_1.throwError(err.errors && err.errors.length > 0
+                ? `${msg} ${err.errors[0].message}`
+                : `${msg} verify input parameters are correct`);
+        });
+    });
+}
+exports.getReleasedVersions = getReleasedVersions;
+function versionProtected(version, protectedVersions) {
+    const idx = version.indexOf('-');
+    const sha = idx > 0 ? version.substring(idx + 1) : version;
+    return protectedVersions.includes(sha);
+}
 
 
 /***/ }),

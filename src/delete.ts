@@ -1,15 +1,16 @@
 import {Input} from './input'
-import {Observable, of, throwError} from 'rxjs'
-import {
-  deletePackageVersions,
-  getOldestVersions,
-  getNotKeptVersions
-} from './version'
+import {from, Observable, of, throwError} from 'rxjs'
+import {deletePackageVersions, getOldestVersions, getNotKeptVersions, getReleasedVersions} from './version'
 import {concatMap, map} from 'rxjs/operators'
 
-export function getVersionIds(input: Input): Observable<string[]> {
+export async function getVersionIds(input: Input): Promise<string[]> {
   if (input.packageVersionIds.length > 0) {
-    return of(input.packageVersionIds)
+    return Promise.resolve(input.packageVersionIds)
+  }
+
+  let protectedVersions: string[] = []
+  if (input.keepReleased) {
+    protectedVersions = await getReleasedVersions(input.owner, input.repo, input.packageName, input.token)
   }
 
   if (input.hasOldestVersionQueryInfo()) {
@@ -18,20 +19,28 @@ export function getVersionIds(input: Input): Observable<string[]> {
       input.repo,
       input.packageName,
       input.numOldVersionsToDelete,
-      input.token
-    ).pipe(map(versionInfo => versionInfo.map(info => info.id)))
+      input.token,
+      protectedVersions
+    )
+      .pipe(map(versionInfo => versionInfo.map(info => info.id)))
+      .toPromise()
   } else if (input.hasNumToKeepQueryInfo()) {
     return getNotKeptVersions(
       input.owner,
       input.repo,
       input.packageName,
       input.numVersionsToKeep,
-      input.token
-    ).pipe(map(versionInfo => versionInfo.map(info => info.id)))
+      input.token,
+      protectedVersions
+    )
+      .pipe(map(versionInfo => versionInfo.map(info => info.id)))
+      .toPromise()
   }
 
-  return throwError(
-    "Could not get packageVersionIds. Explicitly specify using the 'package-version-ids' input or provide the 'package-name' and 'num-old-versions-to-delete' inputs to dynamically retrieve oldest versions"
+  return Promise.reject(
+    new Error(
+      "Could not get packageVersionIds. Explicitly specify using the 'package-version-ids' input or provide the 'package-name' and 'num-old-versions-to-delete' inputs to dynamically retrieve oldest versions"
+    )
   )
 }
 
@@ -47,7 +56,5 @@ export function deleteVersions(input: Input): Observable<boolean> {
     return of(true)
   }
 
-  return getVersionIds(input).pipe(
-    concatMap(ids => deletePackageVersions(ids, input.token))
-  )
+  return from(getVersionIds(input)).pipe(concatMap(ids => deletePackageVersions(ids, input.token)))
 }

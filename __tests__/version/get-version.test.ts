@@ -1,10 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 import {mockOldestQueryResponse} from './graphql.mock'
-import {
-  getOldestVersions as _getOldestVersions,
-  VersionInfo
-} from '../../src/version'
+import {getOldestVersions as _getOldestVersions, VersionInfo} from '../../src/version'
 import {Observable} from 'rxjs'
 
 describe.skip('get versions tests -- call graphql', () => {
@@ -58,11 +55,5 @@ const defaultParams = {
 
 function getOldestVersions(params?: Params): Observable<VersionInfo[]> {
   const p: Required<Params> = {...defaultParams, ...params}
-  return _getOldestVersions(
-    p.owner,
-    p.repo,
-    p.packageName,
-    p.numVersions,
-    p.token
-  )
+  return _getOldestVersions(p.owner, p.repo, p.packageName, p.numVersions, p.token, [])
 }

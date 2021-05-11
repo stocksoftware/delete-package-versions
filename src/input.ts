@@ -6,6 +6,7 @@ export interface InputParams {
   numOldVersionsToDelete?: number
   numVersionsToKeep?: number
   token?: string
+  keepReleased?: boolean
 }
 
 const defaultParams = {
@@ -15,7 +16,8 @@ const defaultParams = {
   packageName: '',
   numOldVersionsToDelete: 0,
   numVersionsToKeep: 0,
-  token: ''
+  token: '',
+  keepReleased: true
 }
 
 export class Input {
@@ -26,6 +28,7 @@ export class Input {
   numOldVersionsToDelete: number
   numVersionsToKeep: number
   token: string
+  keepReleased: boolean
 
   constructor(params?: InputParams) {
     const validatedParams: Required<InputParams> = {...defaultParams, ...params}
@@ -37,6 +40,7 @@ export class Input {
     this.numOldVersionsToDelete = validatedParams.numOldVersionsToDelete
     this.numVersionsToKeep = validatedParams.numVersionsToKeep
     this.token = validatedParams.token
+    this.keepReleased = validatedParams.keepReleased
   }
 
   hasOldestVersionQueryInfo(): boolean {
