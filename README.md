@@ -43,7 +43,7 @@ This action deletes versions of a package from [GitHub Packages](https://github.
   # Defaults to 0.
   num-versions-to-keep:
 
-  # If true, never removes a version associated with a release.
+  # If true, never removes the versions associated with the 30 most recent releases.
   # Defaults to true.
   keep-released:
 

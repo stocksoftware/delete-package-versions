@@ -58,10 +58,10 @@ const queryForLast = `
     }
   }`
 
-const queryFor100Releases = `
+const queryFor30Releases = `
   query getReleases($owner: String!, $repo: String!) {
     repository(owner: $owner, name: $repo) {
-      releases(first:100) {
+      releases(first:30) {
         edges{
           node {
            name
@@ -101,7 +101,7 @@ function queryForOldestVersions(
 }
 
 async function queryForReleases(owner: string, repo: string, token: string): Promise<GetReleasesResponse> {
-  return graphql(token, queryFor100Releases, {
+  return graphql(token, queryFor30Releases, {
     owner,
     repo,
     headers: {

@@ -16227,10 +16227,10 @@ const queryForLast = `
       }
     }
   }`;
-const queryFor100Releases = `
+const queryFor30Releases = `
   query getReleases($owner: String!, $repo: String!) {
     repository(owner: $owner, name: $repo) {
-      releases(first:100) {
+      releases(first:30) {
         edges{
           node {
            name
@@ -16257,7 +16257,7 @@ function queryForOldestVersions(owner, repo, packageName, numVersions, token) {
 }
 function queryForReleases(owner, repo, token) {
     return __awaiter(this, void 0, void 0, function* () {
-        return graphql_1.graphql(token, queryFor100Releases, {
+        return graphql_1.graphql(token, queryFor30Releases, {
             owner,
             repo,
             headers: {

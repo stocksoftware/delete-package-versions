@@ -43,7 +43,7 @@ inputs:
 
   keep-released:
     description: >
-      If true, released versions are not deleted.
+      If true, 30 most recent released versions are not deleted.
       Defaults to true.
     required: false
     default: "true"
