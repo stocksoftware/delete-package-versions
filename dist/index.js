@@ -6081,16 +6081,14 @@ const delete_1 = __webpack_require__(583);
 const operators_1 = __webpack_require__(43);
 function getActionInput() {
     return new input_1.Input({
-        packageVersionIds: core_1.getInput('package-version-ids')
-            ? core_1.getInput('package-version-ids').split(',')
-            : [],
+        packageVersionIds: core_1.getInput('package-version-ids') ? core_1.getInput('package-version-ids').split(',') : [],
         owner: core_1.getInput('owner') ? core_1.getInput('owner') : github_1.context.repo.owner,
         repo: core_1.getInput('repo') ? core_1.getInput('repo') : github_1.context.repo.repo,
         packageName: core_1.getInput('package-name'),
         numOldVersionsToDelete: Number(core_1.getInput('num-old-versions-to-delete')),
         numVersionsToKeep: Number(core_1.getInput('num-versions-to-keep')),
         token: core_1.getInput('token'),
-        keepReleased: Boolean(core_1.getInput('keep-released'))
+        keepReleased: Boolean(core_1.getInput('keep-released') !== 'false')
     });
 }
 function run() {

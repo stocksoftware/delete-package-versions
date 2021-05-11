@@ -7,24 +7,20 @@ import {catchError} from 'rxjs/operators'
 
 function getActionInput(): Input {
   return new Input({
-    packageVersionIds: getInput('package-version-ids')
-      ? getInput('package-version-ids').split(',')
-      : [],
+    packageVersionIds: getInput('package-version-ids') ? getInput('package-version-ids').split(',') : [],
     owner: getInput('owner') ? getInput('owner') : context.repo.owner,
     repo: getInput('repo') ? getInput('repo') : context.repo.repo,
     packageName: getInput('package-name'),
     numOldVersionsToDelete: Number(getInput('num-old-versions-to-delete')),
     numVersionsToKeep: Number(getInput('num-versions-to-keep')),
     token: getInput('token'),
-    keepReleased: Boolean(getInput('keep-released'))
+    keepReleased: Boolean(getInput('keep-released') !== 'false')
   })
 }
 
 function run(): Observable<boolean> {
   try {
-    return deleteVersions(getActionInput()).pipe(
-      catchError(err => throwError(err))
-    )
+    return deleteVersions(getActionInput()).pipe(catchError(err => throwError(err)))
   } catch (error) {
     return throwError(error.message)
   }

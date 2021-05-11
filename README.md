@@ -201,6 +201,13 @@ Delete the oldest 3 version of a package hosted in a different repo than the one
     token: ${{ secrets.GITHUB_PAT }}
 ```
 
+# Development
+### Packaging before commit
+
+```
+npm run pack
+```
+
 # License
 
 The scripts and documentation in this project are released under the [MIT License](https://github.com/actions/delete-package-versions/blob/main/LICENSE)
