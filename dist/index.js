@@ -16325,7 +16325,7 @@ function getNotKeptVersions(owner, repo, packageName, numVersionsToKeep, token, 
                 }
                 const versions = result.repository.packages.edges[0].node.versions.edges;
                 return versions
-                    .filter(value => !protectedVersions.includes(value.node.version))
+                    .filter(value => !versionProtected(value.node.version, protectedVersions))
                     .map(value => ({ id: value.node.id, version: value.node.version }))
                     .reverse();
             }))
