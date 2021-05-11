@@ -15849,9 +15849,7 @@ function getVersionIds(input) {
         console.log(`input.keepReleased = ${input.keepReleased}`);
         let protectedVersions = [];
         if (input.keepReleased) {
-            console.log('getting released versions');
             protectedVersions = yield version_1.getReleasedVersions(input.owner, input.repo, input.packageName, input.token);
-            console.log(`got ${protectedVersions.length} released versions`);
         }
         if (input.hasOldestVersionQueryInfo()) {
             return version_1.getOldestVersions(input.owner, input.repo, input.packageName, input.numOldVersionsToDelete, input.token, protectedVersions)
@@ -16359,11 +16357,6 @@ exports.getReleasedVersions = getReleasedVersions;
 function versionProtected(version, protectedVersions) {
     const idx = version.indexOf('-');
     const sha = idx > 0 ? version.substring(idx + 1) : version;
-    console.log('checking version');
-    console.log(` version = ${version}`);
-    console.log(` sha = ${sha}`);
-    console.log(` protected versions = ${JSON.stringify(protectedVersions)}`);
-    console.log(`protected = ${protectedVersions.includes(sha)}`);
     const protect = protectedVersions.includes(sha);
     if (protect) {
         console.log(`version ${version}, protected`);

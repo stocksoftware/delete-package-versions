@@ -43,6 +43,10 @@ This action deletes versions of a package from [GitHub Packages](https://github.
   # Defaults to 0.
   num-versions-to-keep:
 
+  # If true, never removes a version associated with a release.
+  # Defaults to true.
+  keep-released:
+
   # The token used to authenticate with GitHub Packages.
   # Defaults to github.token.
   # Required if deleting a version from a package hosted in a different repo than the one executing the workflow.
