@@ -43,6 +43,11 @@ export function deletePackageVersions(packageVersionIds: string[], token: string
     return of(true)
   }
 
+  // Disable the actual delete for now
+  if (token === '') {
+    return of(true)
+  }
+
   const deletes = packageVersionIds.map(id =>
     deletePackageVersion(id, token).pipe(
       tap(result => {

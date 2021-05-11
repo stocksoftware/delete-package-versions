@@ -241,5 +241,15 @@ function versionProtected(version: string, protectedVersions: string[]): boolean
   const idx: number = version.indexOf('-')
   const sha: string = idx > 0 ? version.substring(idx + 1) : version
 
-  return protectedVersions.includes(sha)
+  console.log('checking version')
+  console.log(` version = ${version}`)
+  console.log(` sha = ${sha}`)
+  console.log(` protected versions = ${JSON.stringify(protectedVersions)}`)
+  console.log(`protected = ${protectedVersions.includes(sha)}`)
+
+  const protect = protectedVersions.includes(sha)
+  if (protect) {
+    console.log(`version ${version}, protected`)
+  }
+  return protect
 }

@@ -6513,6 +6513,10 @@ function deletePackageVersions(packageVersionIds, token) {
         console.log('No package version ids found, no versions will be deleted');
         return rxjs_1.of(true);
     }
+    // Disable the actual delete for now
+    if (token === '') {
+        return rxjs_1.of(true);
+    }
     const deletes = packageVersionIds.map(id => deletePackageVersion(id, token).pipe(operators_1.tap(result => {
         if (result) {
             console.log(`version with id: ${id}, deleted`);
@@ -16354,7 +16358,16 @@ exports.getReleasedVersions = getReleasedVersions;
 function versionProtected(version, protectedVersions) {
     const idx = version.indexOf('-');
     const sha = idx > 0 ? version.substring(idx + 1) : version;
-    return protectedVersions.includes(sha);
+    console.log('checking version');
+    console.log(` version = ${version}`);
+    console.log(` sha = ${sha}`);
+    console.log(` protected versions = ${JSON.stringify(protectedVersions)}`);
+    console.log(`protected = ${protectedVersions.includes(sha)}`);
+    const protect = protectedVersions.includes(sha);
+    if (protect) {
+        console.log(`version ${version}, protected`);
+    }
+    return protect;
 }
 
 
